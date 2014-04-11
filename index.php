@@ -104,7 +104,7 @@ $tbl_res     = $tbl_query->fetchColumn();
 $tbl_exists  = ($tbl_res != 0);
 if (!$tbl_exists) {
     trigger_error('No table \'' . $_db['table'] . '\'');
-    exit();
+    exit;
 }
 
 // fetch navigation info
