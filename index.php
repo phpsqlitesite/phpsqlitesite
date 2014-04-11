@@ -121,7 +121,7 @@ foreach ($dbh->query($_q['page']) as $row) {
 if (!array_key_exists('content', $page)) {
     header("HTTP/1.0 404 Not Found");
     header("Status: 404 Not Found");
-    exit();
+    exit;
 }
 
 // build navigation
