@@ -39,9 +39,11 @@ $dbh->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 /* cli client */
 if (PHP_SAPI == 'cli') {
   $table = str_replace('.php','',basename(__FILE__));
-  $opts = getopt('t:l:',array('delete','update'));
+  $opts = getopt('t:u:l:',array('delete','update'));
   if (isset($opts['t'])) $title = $opts['t'];
-  if (isset($opts['l'])) $label = $opts['l'];
+  if (isset($opts['u'])) $label = $opts['u'];
+  if (isset($opts['l'])) $lang = $opts['l'];
+  else $lang = DEFAULT_LANG;
   if (!isset($opts['delete'])) {$content = file_get_contents('php://stdin');}
   else {
     $_q['delete'] = "DELETE FROM '$table' WHERE label=\"$label\" LIMIT 1";
@@ -49,14 +51,12 @@ if (PHP_SAPI == 'cli') {
     exit();
   }
   // update option takes label, updates with new values
-  $_q['new'] = "INSERT INTO '$table' (title,label,content) VALUES (\"$title\",\"$label\",\"$content\")";
-  $_q['update'] = "UPDATE '$table' SET title='$title',content='$content' WHERE label='$label'";
+  $_q['new'] = "INSERT INTO '$table' (title,label,content,lang) VALUES (\"$title\",\"$label\",\"$content\",\"$lang\")";
+  $_q['update'] = "UPDATE '$table' SET title='$title',content='$content',lang='$lang' WHERE label='$label'";
 
   if (isset($opts['update'])) $dbh->query($_q['update']);
   else $dbh->query($_q['new']);
 
-  var_dump($opts);
-  var_dump($_q);
   exit();
 }
 
