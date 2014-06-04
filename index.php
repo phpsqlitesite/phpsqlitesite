@@ -1,7 +1,7 @@
 <?php
 /*
   phpsqlitesite 0.3 - PHP / SQLite db -> web script. Requires PHP 5.2 and SQLite 3
-  Copyright (C) 2012 http://phpsqlitesite.com
+  Copyright (c) 2012-2014 http://phpsqlitesite.com
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,6 +19,19 @@
 
 // TODO: redirect missing URI_EXTENSION
 
+/* cli client */
+
+if (PHP_SAPI == 'cli') {
+  //$table = substr(basename(__FILE__),0,strpos(basename (__FILE__)),'.');
+  $table = str_replace('.php','',basename(__FILE__));
+  $opts = getopt('t:l:',array('title:','label:'));
+  var_dump($opts);
+  $_q['new'] = "INSERT INTO '$table' ";
+  var_dump($_q);
+  exit();
+}
+
+
 /* gather, sanitize and set up info for this request */
 
 // start timer
@@ -26,12 +39,12 @@ $_start = microtime(true);
 
 // language to use if no other specified
 define('DEFAULT_LANG', 'en');
-// database location
+// database location - you should rename this
 define('DB_PATH', './demo.sqlite');
 // extension to strip from uri
 define('URI_EXTENSION', '.html');
 
-// inform the user that their database file is accessible
+// inform the user that their database file is accessible to the world
 if (strpos(realpath(DB_PATH), $_SERVER['DOCUMENT_ROOT'], 0) === 0) {
   error_log('Database location in document root');
 }
