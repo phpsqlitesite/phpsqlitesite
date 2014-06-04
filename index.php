@@ -28,15 +28,15 @@ $_start = microtime(true);
 define('DEFAULT_LANG', 'en');
 
 // database location
-define('DB_PATH', 'demo.sqlite');
-define('DISQUS_ID', 'YOUR_DISQUS_ID');
-define('ADDTHIS_ID', 'YOUR_ADDTHIS_PUBID');
+define('DB_PATH', './demo.sqlite');
+//define('DISQUS_ID', 'YOUR_DISQUS_ID');
+//define('ADDTHIS_ID', 'YOUR_ADDTHIS_PUBID');
 define('URI_EXTENSION', '.html');
 
 // inform the user
-if (strpos(realpath(DB_PATH), $_SERVER['DOCUMENT_ROOT'], 0) === 0) {
-    error_log('Database location in document root');
-}
+//if (strpos(realpath(DB_PATH), $_SERVER['DOCUMENT_ROOT'], 0) === 0) {
+//error_log('Database location in document root');
+//}
 
 // extract table name from uri
 $_db['table'] = pathinfo($_SERVER['SCRIPT_NAME'], PATHINFO_FILENAME); //PATHINFO_FILENAME added in php 5.2.
@@ -84,8 +84,8 @@ END;
 
 // define query
 // TODO: prepare query
-$_q['page']       = "SELECT path_info,title,content,lang,description,keywords,label FROM '$_db[table]' WHERE path_info = '$page[path_info]' AND lang='$page[lang]'";
-$_q['navigation'] = "SELECT path_info,title,label FROM '$_db[table]' WHERE hidden IS NOT 'Y' AND lang='$page[lang]' ORDER BY series ASC";
+$_q['page']       = "SELECT path_info,title,content,lang,description,keywords,label FROM '$_db[table]' WHERE label = '$page[path_info]' AND lang='$page[lang]'";
+$_q['navigation'] = "SELECT label,title,label FROM '$_db[table]' WHERE hidden IS NOT 'Y' AND lang='$page[lang]' ORDER BY series ASC";
 
 // debugger
 # print_r($_q);die;
