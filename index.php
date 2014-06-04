@@ -22,15 +22,17 @@
 /* cli client */
 
 if (PHP_SAPI == 'cli') {
-  //$table = substr(basename(__FILE__),0,strpos(basename (__FILE__)),'.');
   $table = str_replace('.php','',basename(__FILE__));
   $opts = getopt('t:l:',array('title:','label:'));
+  $title = isset($opts['t'])?$opts['t']:$opts['title'];
+  $label = isset($opts['l'])?$opts['l']:$opts['label'];
+  $content = file_get_contents('php://stdin');
+
   var_dump($opts);
-  $_q['new'] = "INSERT INTO '$table' ";
+  $_q['new'] = "INSERT INTO '$table' (title,label,content) VALUES (\"$title\",\"$label\",\"$content\")";
   var_dump($_q);
   exit();
 }
-
 
 /* gather, sanitize and set up info for this request */
 
