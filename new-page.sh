@@ -3,7 +3,6 @@
 # page-template.sh
 # part of phpsqlitesite
 # http://phpsqlitesite.com
-
 # runs sqlite sql query to add new page to db
 
 TITLE="$1"

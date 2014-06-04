@@ -31,13 +31,12 @@ define('DB_PATH', './demo.sqlite');
 // extension to strip from uri
 define('URI_EXTENSION', '.html');
 
-// inform the user that their database file is accessible to the world
-if (strpos(realpath(DB_PATH), $_SERVER['DOCUMENT_ROOT'], 0) === 0) {
-  error_log('Database location in document root');
-}
+// open database connection and set connection options
+$db_path = realpath(DB_PATH);
+$dbh = new PDO('sqlite:' . $db_path);
+$dbh->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
 /* cli client */
-
 if (PHP_SAPI == 'cli') {
   $table = str_replace('.php','',basename(__FILE__));
   $opts = getopt('t:l:',array('delete','update'));
@@ -49,14 +48,22 @@ if (PHP_SAPI == 'cli') {
     $dbh->query($_q['delete']);
     exit();
   }
-  // edit option takes label, updates with new values
+  // update option takes label, updates with new values
   $_q['new'] = "INSERT INTO '$table' (title,label,content) VALUES (\"$title\",\"$label\",\"$content\")";
+  $_q['update'] = "UPDATE '$table' SET title='$title',content='$content' WHERE label='$label'";
+
+  if (isset($opts['update'])) $dbh->query($_q['update']);
+  else $dbh->query($_q['new']);
+
   var_dump($opts);
   var_dump($_q);
   exit();
 }
 
-
+// inform the user that their database file is accessible to the world
+if (strpos(realpath(DB_PATH), $_SERVER['DOCUMENT_ROOT'], 0) === 0) {
+  error_log('Database location in document root');
+}
 
 // extract table name from uri
 $_db['table'] = pathinfo($_SERVER['SCRIPT_NAME'], PATHINFO_FILENAME);
@@ -79,11 +86,6 @@ $_q['navigation'] = "SELECT label,title,label FROM '$_db[table]' WHERE hidden IS
 
 // ============================================================ debugger
 # print_r($_q);die;
-
-// open database connection and set connection options
-$db_path = realpath(DB_PATH);
-$dbh = new PDO('sqlite:' . $db_path);
-$dbh->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
 // check if table exists
 $_q['table'] = "SELECT COUNT(name) FROM sqlite_master WHERE type='table' and name='$_db[table]'";
