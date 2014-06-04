@@ -1,6 +1,6 @@
 <?php
 /*
-  phpsqlitesite - PHP / SQLite db -> web script. Requires PHP 5.2 and SQLite 3
+  phpsqlitesite 0.3 - PHP / SQLite db -> web script. Requires PHP 5.2 and SQLite 3
   Copyright (C) 2012 http://phpsqlitesite.com
 
   This program is free software: you can redistribute it and/or modify
@@ -17,24 +17,24 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* phpsqlitesite 0.3 */
 // TODO: redirect missing URI_EXTENSION
 
-// gather, sanitize and set up info for this request
+/* gather, sanitize and set up info for this request */
 
+// start timer
 $_start = microtime(true);
 
 // language to use if no other specified
 define('DEFAULT_LANG', 'en');
-
 // database location
 define('DB_PATH', './demo.sqlite');
+// extension to strip from uri
 define('URI_EXTENSION', '.html');
 
-// inform the user
-//if (strpos(realpath(DB_PATH), $_SERVER['DOCUMENT_ROOT'], 0) === 0) {
-//error_log('Database location in document root');
-//}
+// inform the user that their database file is accessible
+if (strpos(realpath(DB_PATH), $_SERVER['DOCUMENT_ROOT'], 0) === 0) {
+  error_log('Database location in document root');
+}
 
 // extract table name from uri
 $_db['table'] = pathinfo($_SERVER['SCRIPT_NAME'], PATHINFO_FILENAME);
@@ -49,7 +49,6 @@ $page['path_info'] = isset($_SERVER['PATH_INFO']) ? preg_replace('@[^\w\-_]@', '
 
 // get search term
 $page['search']    = isset($_GET['search']) ? preg_replace('@\W@', '%', $_GET['search']) : '';
-
 
 // SQL book
 // TODO: prepare query
@@ -204,7 +203,7 @@ header('Content-Language: ' . $page['lang']);
             <?php echo $page['disqus']; ?>
         </div>
         <div id="footer">
-            &copy; 2012
+            &copy; 2012-<?php date('Y'); ?>
             Powered by <a href="http://phpsqlitesite.com">phpsqlitesite</a>
             <span style = "float:right">Page generated in <?php echo microtime(true) - $_start; ?> seconds
                 and <?php echo ceil(memory_get_peak_usage() / 1024); ?> kB</span>
