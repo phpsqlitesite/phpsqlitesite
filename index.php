@@ -39,11 +39,20 @@ $dbh->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 /* cli client */
 if (PHP_SAPI == 'cli') {
   $table = str_replace('.php','',basename(__FILE__));
-  $opts = getopt('t:u:l:',array('delete','update'));
+  $opts = getopt('t:u:l:',array('delete','update','export'));
   if (isset($opts['t'])) $title = $opts['t'];
   if (isset($opts['u'])) $label = $opts['u'];
   if (isset($opts['l'])) $lang = $opts['l'];
   else $lang = DEFAULT_LANG;
+
+  // export
+  if (isset($opts['export'])) {
+    $label = $opts['l'];
+    foreach($dbh->query("SELECT content FROM '$table' WHERE label='$label' LIMIT 1") as $html)
+      echo implode($html,"\n");
+    exit();
+  }
+
   if (!isset($opts['delete'])) {$content = file_get_contents('php://stdin');}
   else {
     $_q['delete'] = "DELETE FROM '$table' WHERE label=\"$label\" LIMIT 1";
@@ -81,7 +90,7 @@ $page['search']    = isset($_GET['search']) ? preg_replace('@\W@', '%', $_GET['s
 
 // SQL book
 // TODO: prepare query
-$_q['page']       = "SELECT path_info,title,content,lang,description,keywords,label FROM '$_db[table]' WHERE label = '$page[path_info]' AND lang='$page[lang]'";
+$_q['page']       = "SELECT label,title,content,lang,description,keywords,label FROM '$_db[table]' WHERE label = '$page[path_info]' AND lang='$page[lang]'";
 $_q['navigation'] = "SELECT label,title,label FROM '$_db[table]' WHERE hidden IS NOT 'Y' AND lang='$page[lang]' ORDER BY series ASC";
 
 // ============================================================ debugger
@@ -120,8 +129,8 @@ $base = $_SERVER['SCRIPT_NAME'];
 foreach ($navigation as $nav) {
   $target_location = dirname($base);
 
-  if (!empty($nav['path_info'])) {
-    $target_location = "$base/$nav[path_info]" . URI_EXTENSION;
+  if (!empty($nav['label'])) {
+    $target_location = "$base/$nav[label]" . URI_EXTENSION;
   }
 
   $page['navigation'][] = "<a href=\"$target_location\" title=\"$nav[title]\">$nav[label]</a>";
@@ -129,7 +138,7 @@ foreach ($navigation as $nav) {
 
 // perform search ( and replace page content )
 if (!empty($page['search'])) {
-  $_q['search'] = "SELECT path_info,title FROM '$_db[table]' WHERE content LIKE '%$page[search]%' OR title LIKE '%$page[search]%' OR path_info LIKE '%$page[search]%'";
+  $_q['search'] = "SELECT label,title FROM '$_db[table]' WHERE content LIKE '%$page[search]%' OR title LIKE '%$page[search]%' OR label LIKE '%$page[search]%'";
 
   // fetch search info
   $page['results'] = array();
@@ -140,7 +149,7 @@ if (!empty($page['search'])) {
   $page['title']   = $page['content'] = 'Search results for &lsquo;' . str_replace('%', ' ', $page['search']) . '&rsquo;';
   $page['content'] .= '<ul>';
   foreach ($page['results'] as $res) {
-    $result_location = "$base/$res[path_info]" . URI_EXTENSION;
+    $result_location = "$base/$res[label]" . URI_EXTENSION;
     $page['content'] .= "<li><a href=\"$result_location\" title=\"$res[title]\">$res[title]</a></li>";
   }
   $page['content'] .= '</ul>';
