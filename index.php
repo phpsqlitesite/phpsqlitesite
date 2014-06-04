@@ -69,60 +69,60 @@ $tbl_query   = $dbh->query($_q['table']);
 $tbl_res     = $tbl_query->fetchColumn();
 $tbl_exists  = ($tbl_res != 0);
 if (!$tbl_exists) {
-    trigger_error('No table \'' . $_db['table'] . '\'');
-    exit;
+  trigger_error('No table \'' . $_db['table'] . '\'');
+  exit;
 }
 
 // fetch navigation info
 foreach ($dbh->query($_q['navigation']) as $row) {
-    $navigation[] = $row;
+  $navigation[] = $row;
 }
 
 // fetch current page from db
 foreach ($dbh->query($_q['page']) as $row) {
-    $page = array_merge($page, $row);
+  $page = array_merge($page, $row);
 }
 
 // return 404 if no page found
 // TODO: custom page
 if (!array_key_exists('content', $page)) {
-    header("HTTP/1.0 404 Not Found");
-    header("Status: 404 Not Found");
-    exit;
+  header("HTTP/1.0 404 Not Found");
+  header("Status: 404 Not Found");
+  exit;
 }
 
 // build navigation
 $base = $_SERVER['SCRIPT_NAME'];
 foreach ($navigation as $nav) {
-    $target_location = dirname($base);
+  $target_location = dirname($base);
 
-    if (!empty($nav['path_info'])) {
-        $target_location = "$base/$nav[path_info]" . URI_EXTENSION;
-    }
+  if (!empty($nav['path_info'])) {
+    $target_location = "$base/$nav[path_info]" . URI_EXTENSION;
+  }
 
-    $page['navigation'][] = "<a href=\"$target_location\" title=\"$nav[title]\">$nav[label]</a>";
+  $page['navigation'][] = "<a href=\"$target_location\" title=\"$nav[title]\">$nav[label]</a>";
 }
 
 // perform search ( and replace page content )
 if (!empty($page['search'])) {
-    $_q['search'] = "SELECT path_info,title FROM '$_db[table]' WHERE content LIKE '%$page[search]%' OR title LIKE '%$page[search]%' OR path_info LIKE '%$page[search]%'";
+  $_q['search'] = "SELECT path_info,title FROM '$_db[table]' WHERE content LIKE '%$page[search]%' OR title LIKE '%$page[search]%' OR path_info LIKE '%$page[search]%'";
 
-    // fetch search info
-    $page['results'] = array();
-    foreach ($dbh->query($_q['search']) as $row) {
-        $page['results'][] = $row;
-    }
+  // fetch search info
+  $page['results'] = array();
+  foreach ($dbh->query($_q['search']) as $row) {
+    $page['results'][] = $row;
+  }
 
-    $page['title']   = $page['content'] = 'Search results for &lsquo;' . str_replace('%', ' ', $page['search']) . '&rsquo;';
-    $page['content'] .= '<ul>';
-    foreach ($page['results'] as $res) {
-        $result_location = "$base/$res[path_info]" . URI_EXTENSION;
-        $page['content'] .= "<li><a href=\"$result_location\" title=\"$res[title]\">$res[title]</a></li>";
-    }
-    $page['content'] .= '</ul>';
+  $page['title']   = $page['content'] = 'Search results for &lsquo;' . str_replace('%', ' ', $page['search']) . '&rsquo;';
+  $page['content'] .= '<ul>';
+  foreach ($page['results'] as $res) {
+    $result_location = "$base/$res[path_info]" . URI_EXTENSION;
+    $page['content'] .= "<li><a href=\"$result_location\" title=\"$res[title]\">$res[title]</a></li>";
+  }
+  $page['content'] .= '</ul>';
 
-    // no comments section on search results page
-    $page['disqus'] = '';
+  // no comments section on search results page
+  $page['disqus'] = '';
 }
 
 header('Content-Type: text/html; charset=UTF-8');
