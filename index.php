@@ -19,21 +19,6 @@
 
 // TODO: redirect missing URI_EXTENSION
 
-/* cli client */
-
-if (PHP_SAPI == 'cli') {
-  $table = str_replace('.php','',basename(__FILE__));
-  $opts = getopt('t:l:',array('title:','label:'));
-  $title = isset($opts['t'])?$opts['t']:$opts['title'];
-  $label = isset($opts['l'])?$opts['l']:$opts['label'];
-  $content = file_get_contents('php://stdin');
-
-  var_dump($opts);
-  $_q['new'] = "INSERT INTO '$table' (title,label,content) VALUES (\"$title\",\"$label\",\"$content\")";
-  var_dump($_q);
-  exit();
-}
-
 /* gather, sanitize and set up info for this request */
 
 // start timer
@@ -50,6 +35,28 @@ define('URI_EXTENSION', '.html');
 if (strpos(realpath(DB_PATH), $_SERVER['DOCUMENT_ROOT'], 0) === 0) {
   error_log('Database location in document root');
 }
+
+/* cli client */
+
+if (PHP_SAPI == 'cli') {
+  $table = str_replace('.php','',basename(__FILE__));
+  $opts = getopt('t:l:',array('delete','update'));
+  if (isset($opts['t'])) $title = $opts['t'];
+  if (isset($opts['l'])) $label = $opts['l'];
+  if (!isset($opts['delete'])) {$content = file_get_contents('php://stdin');}
+  else {
+    $_q['delete'] = "DELETE FROM '$table' WHERE label=\"$label\" LIMIT 1";
+    $dbh->query($_q['delete']);
+    exit();
+  }
+  // edit option takes label, updates with new values
+  $_q['new'] = "INSERT INTO '$table' (title,label,content) VALUES (\"$title\",\"$label\",\"$content\")";
+  var_dump($opts);
+  var_dump($_q);
+  exit();
+}
+
+
 
 // extract table name from uri
 $_db['table'] = pathinfo($_SERVER['SCRIPT_NAME'], PATHINFO_FILENAME);
