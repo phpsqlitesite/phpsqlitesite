@@ -231,11 +231,9 @@ header('Content-Language: ' . $page['lang']);
         <div id="content">
             <h1><?php echo $page['title']; ?></h1>
             <?php echo $page['addthis']; ?><br>
-
             <?php if (!empty($page['image'])): ?>
                 <img alt="<?php echo $page['image']; ?>" src="<?php echo dirname($base) . '/' . $page['image']; ?>">
             <?php endif ?>
-
             <?php echo $page['content'], "\n"; ?>
         </div>
         <div id="comments">
