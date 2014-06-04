@@ -29,8 +29,6 @@ define('DEFAULT_LANG', 'en');
 
 // database location
 define('DB_PATH', './demo.sqlite');
-//define('DISQUS_ID', 'YOUR_DISQUS_ID');
-//define('ADDTHIS_ID', 'YOUR_ADDTHIS_PUBID');
 define('URI_EXTENSION', '.html');
 
 // inform the user
@@ -39,62 +37,31 @@ define('URI_EXTENSION', '.html');
 //}
 
 // extract table name from uri
-$_db['table'] = pathinfo($_SERVER['SCRIPT_NAME'], PATHINFO_FILENAME); //PATHINFO_FILENAME added in php 5.2.
+$_db['table'] = pathinfo($_SERVER['SCRIPT_NAME'], PATHINFO_FILENAME);
+// PATHINFO_FILENAME added in php 5.2.
 // This will probably run on earlier versions if a method other than PATHINFO_FILENAME is used.
 
 // extract language from uri if present
 $page['lang'] = isset($_GET['lang']) ? preg_replace('@[^\w\-_]@', '', $_GET['lang']) : DEFAULT_LANG;
+
+// get page uri from path info
 $page['path_info'] = isset($_SERVER['PATH_INFO']) ? preg_replace('@[^\w\-_]@', '', substr($_SERVER['PATH_INFO'], 0, strpos($_SERVER['PATH_INFO'], '.'))) : '';
+
+// get search term
 $page['search']    = isset($_GET['search']) ? preg_replace('@\W@', '%', $_GET['search']) : '';
 
-// define addthis sharing code
-if (defined('ADDTHIS_ID')) {
-    $addthis_id      = ADDTHIS_ID;
-    $page['addthis'] = <<<END
-<div class="addthis_toolbox addthis_default_style ">
-<a class="addthis_button_preferred_1"></a>
-<a class="addthis_button_preferred_2"></a>
-<a class="addthis_button_preferred_3"></a>
-<a class="addthis_button_preferred_4"></a>
-<a class="addthis_button_compact"></a>
-<a class="addthis_counter addthis_bubble_style"></a>
-</div>
-<script type="text/javascript">var addthis_config = {"data_track_addressbar":true};</script>
-<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=$addthis_id"></script>
-END;
-}
 
-// define disqus commenting code
-if (defined('DISQUS_ID')) {
-    $disqus_id      = DISQUS_ID;
-    $page['disqus'] = <<<END
-        <div id="disqus_thread"></div>
-        <script type="text/javascript">
-            var disqus_shortname = '$disqus_id'; // required: replace example with your forum shortname
-            (function() {
-                var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-                dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
-                (document.getElementsByTagName('head')[0] || document.getEle\')[0]).appendChild(dsq);
-            })();
-        </script>
-        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-END;
-}
-
-// define query
+// SQL book
 // TODO: prepare query
 $_q['page']       = "SELECT path_info,title,content,lang,description,keywords,label FROM '$_db[table]' WHERE label = '$page[path_info]' AND lang='$page[lang]'";
 $_q['navigation'] = "SELECT label,title,label FROM '$_db[table]' WHERE hidden IS NOT 'Y' AND lang='$page[lang]' ORDER BY series ASC";
 
-// debugger
+// ============================================================ debugger
 # print_r($_q);die;
 
-// open database connection
+// open database connection and set connection options
 $db_path = realpath(DB_PATH);
-$dbh     = new PDO('sqlite:' . $db_path);
-
-// set connection options
+$dbh = new PDO('sqlite:' . $db_path);
 $dbh->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
 // check if table exists
@@ -112,12 +79,13 @@ foreach ($dbh->query($_q['navigation']) as $row) {
     $navigation[] = $row;
 }
 
-// fetch current page
+// fetch current page from db
 foreach ($dbh->query($_q['page']) as $row) {
     $page = array_merge($page, $row);
 }
 
 // return 404 if no page found
+// TODO: custom page
 if (!array_key_exists('content', $page)) {
     header("HTTP/1.0 404 Not Found");
     header("Status: 404 Not Found");
@@ -133,9 +101,7 @@ foreach ($navigation as $nav) {
         $target_location = "$base/$nav[path_info]" . URI_EXTENSION;
     }
 
-    $page['navigation'][] = <<<END
-<a href="$target_location" title="$nav[title]">$nav[label]</a>
-END;
+    $page['navigation'][] = "<a href=\"$target_location\" title=\"$nav[title]\">$nav[label]</a>";
 }
 
 // perform search ( and replace page content )
@@ -152,9 +118,7 @@ if (!empty($page['search'])) {
     $page['content'] .= '<ul>';
     foreach ($page['results'] as $res) {
         $result_location = "$base/$res[path_info]" . URI_EXTENSION;
-        $page['content'] .= <<<END
-<li><a href="$result_location" title="$res[title]">$res[title]</a></li>
-END;
+        $page['content'] .= "<li><a href=\"$result_location\" title=\"$res[title]\">$res[title]</a></li>";
     }
     $page['content'] .= '</ul>';
 
