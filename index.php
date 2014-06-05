@@ -236,7 +236,7 @@ header('Content-Language: ' . $page['lang']);
             <?php echo $page['disqus']; ?>
         </div>
         <div id="footer">
-            &copy; 2012-<?php date('Y'); ?>
+            &copy; 2012-<?php echo date('Y'); ?>
             Powered by <a href="http://phpsqlitesite.com">phpsqlitesite</a>
             <span style = "float:right">Page generated in <?php echo microtime(true) - $_start; ?> seconds
                 and <?php echo ceil(memory_get_peak_usage() / 1024); ?> kB</span>
