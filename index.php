@@ -86,11 +86,11 @@ $page['lang'] = isset($_GET['lang']) ? preg_replace('@[^\w\-_]@', '', $_GET['lan
 $page['path_info'] = isset($_SERVER['PATH_INFO']) ? preg_replace('@[^\w\-_]@', '', substr($_SERVER['PATH_INFO'], 0, strpos($_SERVER['PATH_INFO'], '.'))) : '';
 
 // get search term
-$page['search']    = isset($_GET['search']) ? preg_replace('@\W@', '%', $_GET['search']) : '';
+$page['search'] = isset($_GET['search']) ? preg_replace('@\W@', '%', $_GET['search']) : '';
 
 // SQL book
 // TODO: prepare query
-$_q['page']       = "SELECT label,title,content,lang,description,keywords,label FROM '$_db[table]' WHERE label = '$page[path_info]' AND lang='$page[lang]'";
+$_q['page'] = "SELECT label,title,content,lang,description,keywords,label FROM '$_db[table]' WHERE label = '$page[path_info]' AND lang='$page[lang]'";
 $_q['navigation'] = "SELECT label,title,label FROM '$_db[table]' WHERE hidden IS NOT 'Y' AND lang='$page[lang]' ORDER BY series ASC";
 
 // ============================================================ debugger
